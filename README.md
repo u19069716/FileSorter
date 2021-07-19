@@ -12,3 +12,16 @@ Simple program to watch a directory &amp; organize files within that directory
 - Watch a directory for changes, run organising only when new files are added
 - Efficient sorting & moving of files
 - GUI
+
+## Branching Strategy
+- main
+- develop
+    - {project section}
+        - {project section} - {issue #}
+        - {project section} - {issue #}
+    - {project section}
+        - {project section} - {issue #}
+        - {project section} - {issue #}
+        - {project section} - {issue #}
+    - {project section}
+        - {project section} - {issue #}
