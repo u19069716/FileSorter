@@ -2,12 +2,16 @@ from pathlib import Path, PurePath
 from FileSorter.classes import *
 
 
-def getPathsInDirectory(directory):
-    entries = Path(directory)
-    return entries.iterdir()
+def getPurePathsFromDirectory(directory):
+    '''
+    Get the contents of a directory
 
+    Return: 2 lists of instances of pathlib.PurePath. The first list contains directories, the second list contains non-directory objects.
 
-def getPurePaths(paths):
+    Input: the absolute directory for which you'd like to get the contents
+    '''
+
+    paths = Path(directory).iterdir()
     directories = []
     nonDirectories = []
     for path in paths:
@@ -18,35 +22,40 @@ def getPurePaths(paths):
     return directories, nonDirectories
 
 
-def getPurePathsFromDirectory(directory):
-    return getPurePaths(getPathsInDirectory(directory))
+def labelPurePathsOnCriteria(paths, labelConfigList):
+    '''
+    Label the contents of a directory based on specific criteria
 
+    Return: a list of instances of FileSorter.classes.sortedPurePath.
 
-def getFormattedDirectoryContents(directory):
-    pureDirectoryPaths, pureNonDirectoryPaths = getPurePaths(
-        getPathsInDirectory(directory))
-    return [(str(path.name) + " [directory]") for path in pureDirectoryPaths] + [str(path.name) for path in pureNonDirectoryPaths]
+    Input: a list of instances of pathlib.PurePath and a list of instances of FileSorter.classes.sortConfig
 
+    '''
 
-def sortPurePathsOnCriteria(paths, sortConfigList):
-    sortedPurePaths = {}
-    unsortedPurePaths = paths
-    for sortConfig in sortConfigList:
-        configDirectory = sortConfig.getTargetDirectory()
-        if not configDirectory in [sortedPurePaths[sortedPurePath].getTargetDirectory() for sortedPurePath in sortedPurePaths]:
-            sortedPurePaths[configDirectory] = sortedPurePath(configDirectory)
+    labelledPurePaths = {}
+    unlabelledPurePaths = paths
+    for sortConfig in labelConfigList:
+        configDirectory = sortConfig.getLabel()
+        if not configDirectory in [labelledPurePaths[labelledPurePath].getLabel() for labelledPurePath in labelledPurePaths]:
+            labelledPurePaths[configDirectory] = labelledPurePath(
+                configDirectory)
 
-        for unsortedPurePath in unsortedPurePaths:
+        for unsortedPurePath in unlabelledPurePaths:
             if sortConfig.passCriteria(unsortedPurePath):
-                sortedPurePaths[configDirectory].addPurePath(
+                labelledPurePaths[configDirectory].addPurePath(
                     unsortedPurePath)
-                unsortedPurePaths.remove(unsortedPurePath)
+                unlabelledPurePaths.remove(unsortedPurePath)
 
-    return sortedPurePaths
+    return labelledPurePaths
 
 
 def printFormattedSortedPurePaths(sortedPurePaths):
-    for targetDirectory in sortedPurePaths:
-        print("Directory: " + targetDirectory)
-        for purePath in sortedPurePaths[targetDirectory].getSortedPurePaths():
+    '''
+    Print the sorted contents of a directory
+
+    Input: A list of instances of FileSorter.classes.sortedPurePath
+    '''
+    for label in sortedPurePaths:
+        print("Label: " + label)
+        for purePath in sortedPurePaths[label].getSortedPurePaths():
             print("\tFile: " + str(purePath))

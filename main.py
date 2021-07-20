@@ -10,10 +10,9 @@ from FileSorter.classes import *
 #################
 
 directories = ['/home/alexwhuman/Downloads/']
-sortingConfiguration = [
-    sortConfig('/home/alexwhuman/Downloads/textFiles',
-               [matchesFileExtensions(['.txt'])]),
-    sortConfig('/home/alexwhuman/Downloads/Unsorted', [sortCriterion()])
+labellingConfiguration = [
+    labelConfig('Text Files', [matchesFileExtensions(['.txt'])]),
+    labelConfig('Unsorted', [labelCriterion()])
 ]
 
 ################
@@ -23,6 +22,6 @@ sortingConfiguration = [
 for directory in directories:
     directoryPurePaths, nonDirectoryPurePaths = getPurePathsFromDirectory(
         directory)
-    sortedPurePaths = sortPurePathsOnCriteria(
-        nonDirectoryPurePaths, sortingConfiguration)
-    printFormattedSortedPurePaths(sortedPurePaths)
+    labelledPurePaths = labelPurePathsOnCriteria(
+        nonDirectoryPurePaths, labellingConfiguration)
+    printFormattedSortedPurePaths(labelledPurePaths)
