@@ -2,6 +2,8 @@ from pathlib import Path, PurePath
 import configparser
 import os
 from FileSorter.classes import *
+import logging
+logger = logging.getLogger(__name__)
 
 
 def get_pure_paths_from_directory(directory):
@@ -10,9 +12,9 @@ def get_pure_paths_from_directory(directory):
 
     Return: 2 lists of instances of pathlib.PurePath. The first list contains directories, the second list contains non-directory objects.
 
-    Input: the absolute directory for which you'd like to get the contents
+    Input: the absolute directory (string) for which you'd like to get the contents
     '''
-
+    logger.debug('Getting pure paths for: \'{}\''.format(directory))
     paths = Path(directory).iterdir()
     directories = []
     non_directories = []
@@ -21,6 +23,7 @@ def get_pure_paths_from_directory(directory):
             directories.append(PurePath(path))
         else:
             non_directories.append(PurePath(path))
+    logger.debug('Got pure paths for: \'{}\''.format(directory))
     return directories, non_directories
 
 
@@ -33,18 +36,26 @@ def label_pure_paths_on_criteria(paths, label_config_list):
     Input: a list of instances of pathlib.PurePath and a list of instances of FileSorter.classes.sortConfig
 
     '''
-
+    logger.debug('Labelling pure paths:')
     labelled_pure_paths = {}
     unlabelled_pure_paths = paths
     for sort_config in label_config_list:
         config_label = sort_config.get_label()
+        logger.debug('\tLabelling paths for: \'{}\''.format(config_label))
         if not config_label in [labelled_pure_paths[labelled_pure_path].get_label() for labelled_pure_path in labelled_pure_paths]:
             labelled_pure_paths[config_label] = LabelledPurePath(
                 config_label)
+            logger.debug(
+                '\t\tlabel \'{}\' not present, adding new label'.format(config_label))
+        else:
+            logger.debug(
+                '\t\tlabel \'{}\' already present, continuing'.format(config_label))
         currently_unlabelled_pure_paths = unlabelled_pure_paths
 
         for unlabelled_pure_path in unlabelled_pure_paths:
             if sort_config.pass_criteria(unlabelled_pure_path):
+                logger.debug('\t\tfile \'{}\' matches \'{}\' criteria'.format(
+                    unlabelled_pure_path, config_label))
                 labelled_pure_paths[config_label].add_pure_path(
                     unlabelled_pure_path)
                 unlabelled_pure_paths.remove(unlabelled_pure_path)
@@ -79,7 +90,7 @@ def get_config(config_directory):
             target_directories = []
             for target_directory in config['TARGET DIRECTORIES']:
                 if does_file_exist(
-                        config['TARGET DIRECTORIES'][target_directory], PurePath(config['TARGET DIRECTORIES'][target_directory]).parent):
+                        config['TARGET DIRECTORIES'][target_directory], PurePath(config['TARGET DIRECTORIES'][target_directory]).parent.as_posix()):
                     target_directories.append(
                         config['TARGET DIRECTORIES'][target_directory])
                 else:
@@ -135,5 +146,12 @@ def does_file_exist(file_path, search_path='.'):
     directory_paths, non_directory_paths = get_pure_paths_from_directory(
         search_path)
     if pure_file_path in [pure_path for pure_path in non_directory_paths + directory_paths]:
+        logger.debug('\'{}\' exists'.format(file_path))
         return True
+    logger.debug('\'{}\' does not exist'.format(file_path))
     return False
+
+
+def setup_logging():
+    logging.basicConfig(filename='log.txt', format='%(asctime)s\t[%(levelname)s]\t%(message)s', datefmt='%m/%d/%Y - %I:%M:%S', level=logging.DEBUG
+                        )

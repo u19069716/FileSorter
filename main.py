@@ -1,9 +1,15 @@
-###########
-# Imports #
-###########
+#####################
+# Imports & Logging #
+#####################
 
 from FileSorter.functions import *
 from FileSorter.classes import *
+import logging
+logger = logging.getLogger(__name__)
+setup_logging()
+
+logger.info('Main Program Starting')
+
 
 #################
 # Configuration #
@@ -11,6 +17,7 @@ from FileSorter.classes import *
 
 
 directories, label_configuration = get_config('./config.ini')
+logger.info('Configuration successfully loaded')
 
 
 ################
@@ -18,6 +25,7 @@ directories, label_configuration = get_config('./config.ini')
 ################
 
 for directory in directories:
+
     directory_pure_paths, non_directory_pure_paths = get_pure_paths_from_directory(
         directory)
 
