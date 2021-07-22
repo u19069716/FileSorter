@@ -9,19 +9,19 @@ from FileSorter.classes import *
 # Configuration #
 #################
 
-directories = ['/home/alexwhuman/Downloads/']
-labellingConfiguration = [
-    labelConfig('Text Files', [matchesFileExtensions(['.txt'])]),
-    labelConfig('Unsorted', [labelCriterion()])
-]
+
+directories, label_configuration = get_config('./config.ini')
+
 
 ################
 # Main Program #
 ################
 
 for directory in directories:
-    directoryPurePaths, nonDirectoryPurePaths = getPurePathsFromDirectory(
+    directory_pure_paths, non_directory_pure_paths = get_pure_paths_from_directory(
         directory)
-    labelledPurePaths = labelPurePathsOnCriteria(
-        nonDirectoryPurePaths, labellingConfiguration)
-    printFormattedSortedPurePaths(labelledPurePaths)
+
+    labelled_pure_paths = label_pure_paths_on_criteria(
+        non_directory_pure_paths, label_configuration)
+
+    print_formatted_labelled_pure_paths(labelled_pure_paths)

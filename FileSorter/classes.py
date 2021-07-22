@@ -1,4 +1,4 @@
-class labelConfig():
+class LabelConfig():
     '''
     Used to check whether a non-directory path matches a set of criteria 
     '''
@@ -13,10 +13,10 @@ class labelConfig():
         self.label = label
         self.sortCriteria = sortCriteria
 
-    def getLabel(self):
+    def get_label(self):
         return self.label
 
-    def passCriteria(self, pureFilePath):
+    def pass_criteria(self, pureFilePath):
         '''
         Determines whether a given pure path matches the criteria stored within the class
 
@@ -25,13 +25,13 @@ class labelConfig():
         Return: True or False
         '''
         for criterion in self.sortCriteria:
-            if criterion.passCriterion(pureFilePath):
+            if criterion.pass_criterion(pureFilePath):
                 return True
 
         return False
 
 
-class labelledPurePath():
+class LabelledPurePath():
     '''
     Used to attach a label to list of instances of pathlib.PurePath
     '''
@@ -45,7 +45,7 @@ class labelledPurePath():
         self.label = label
         self.purePaths = []
 
-    def addPurePath(self, purePath):
+    def add_pure_path(self, purePath):
         '''
         Add another instance of pathlib.PurePath to the list within this class
 
@@ -53,19 +53,22 @@ class labelledPurePath():
         '''
         self.purePaths.append(purePath)
 
-    def getLabel(self):
+    def get_label(self):
         return self.label
 
-    def getLabelledPurePaths(self):
+    def get_labelled_pure_paths(self):
         return self.purePaths
 
+##############################
+# Labelling Criteria Classes #
+##############################
 
-class labelCriterion():
+class LabelCriterion():
     '''
     Parent class for all criteria a given filepath can match
     '''
 
-    def passCriterion(self, PureFilePath):
+    def pass_criterion(self, PureFilePath):
         '''
         Will be redefined by child classes, currently just returns True 
         (used for the "unsorted" label)
@@ -73,7 +76,7 @@ class labelCriterion():
         return True
 
 
-class matchesFileExtensions(labelCriterion):
+class MatchesFileExtensions(LabelCriterion):
     '''
     Used to check if a filepath matches a specific list of file extensions
     '''
@@ -86,7 +89,7 @@ class matchesFileExtensions(labelCriterion):
         '''
         self.fileExtensions = fileExtensions
 
-    def passCriterion(self, PureFilePath):
+    def pass_criterion(self, PureFilePath):
         '''
         Check if the provided filepath's suffix matches the list of stores file extensions
 
