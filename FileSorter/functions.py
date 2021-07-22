@@ -1,5 +1,6 @@
 from pathlib import Path, PurePath
 import configparser
+import os
 from FileSorter.classes import *
 
 
@@ -50,6 +51,7 @@ def label_pure_paths_on_criteria(paths, label_config_list):
 
     return labelled_pure_paths
 
+
 def print_formatted_labelled_pure_paths(labelled_pure_paths):
     '''
     Print the sorted contents of a directory
@@ -62,28 +64,76 @@ def print_formatted_labelled_pure_paths(labelled_pure_paths):
             print("\tFile: " + str(pure_path))
 
 
-def get_config(configDirectory):
+def get_config(config_directory):
     '''
     Read the configuration file, get the target directories and the label configurations
 
     Return: A list of target directories and a list of instances of labelConfig
     '''
+    if does_file_exist(config_directory):
+        config = configparser.ConfigParser()
+        config.optionxform = str  # Retain upper case characters in config file
+        config.read(config_directory)
 
-    config = configparser.ConfigParser()
-    config.optionxform = str  # Retain upper case characters in config file
-    config.read(configDirectory)
+        try:
+            target_directories = []
+            for target_directory in config['TARGET DIRECTORIES']:
+                if does_file_exist(
+                        config['TARGET DIRECTORIES'][target_directory], PurePath(config['TARGET DIRECTORIES'][target_directory]).parent):
+                    target_directories.append(
+                        config['TARGET DIRECTORIES'][target_directory])
+                else:
+                    # TODO: Log an error here
+                    print("ERROR: Cannot find \'{}\' target directory".format(
+                        target_directory))  # debug
+                    print("TERMINATING")  # debug
+                    os.sys.exit()
 
-    target_directories = []
-    for target_directory in config['DIRECTORIES']:
-        target_directories.append(config['DIRECTORIES'][target_directory])
+        except KeyError:
+            # TODO: Log an error here
+            print("ERROR: Can't find \'DIRECTORIES\' section in config.ini")  # debug
+            print("TERMINATING")  # debug
+            os.sys.exit()
 
-    label_configs = []
-    for label in config['LABELS']:
-        label_criteria = []
-        label_criteria_strings = config['LABELS'][label].split('&')
-        for label_criterion_string in label_criteria_strings:
-            label_criterion_instance = eval(label_criterion_string)
-            label_criteria.append(label_criterion_instance)
-        label_configs.append(LabelConfig(label, label_criteria))
+        try:
+            label_configs = []
+            for label in config['LABELS']:
+                label_criteria = []
+                label_criteria_strings = config['LABELS'][label].split('&')
+                try:
+                    for label_criterion_string in label_criteria_strings:
+                        label_criterion_instance = eval(label_criterion_string)
+                        label_criteria.append(label_criterion_instance)
+                    label_configs.append(LabelConfig(label, label_criteria))
+                except SyntaxError:
+                    # TODO: Log an error here
+                    print("ERROR: Incorrect Syntax in \'LABELS\' section")  # debug
+                    print("TERMINATING")  # debug
+                    os.sys.exit()
+            return target_directories, label_configs
+        except KeyError:
+            # TODO: Log an error here
+            print("ERROR: Can't find \'LABELS\' section in config.ini")  # debug
+            print("TERMINATING")  # debug
+            os.sys.exit()
+    else:
+        # TODO: Log an error here
+        print("ERROR: Can't find config file")  # debug
+        print("TERMINATING")  # debug
+        os.sys.exit()
 
-    return target_directories, label_configs
+
+def does_file_exist(file_path, search_path='.'):
+    '''
+    Check whether or not a file exists
+
+    Input: An instance of pathlib.PurePath & an optional search directory 
+
+    Return: True or False
+    '''
+    pure_file_path = PurePath(file_path)
+    directory_paths, non_directory_paths = get_pure_paths_from_directory(
+        search_path)
+    if pure_file_path in [pure_path for pure_path in non_directory_paths + directory_paths]:
+        return True
+    return False
