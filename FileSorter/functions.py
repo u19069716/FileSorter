@@ -57,5 +57,5 @@ def printFormattedSortedPurePaths(sortedPurePaths):
     '''
     for label in sortedPurePaths:
         print("Label: " + label)
-        for purePath in sortedPurePaths[label].getSortedPurePaths():
+        for purePath in sortedPurePaths[label].getLabelledPurePaths():
             print("\tFile: " + str(purePath))
